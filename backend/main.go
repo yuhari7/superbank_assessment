@@ -9,20 +9,23 @@ import (
 )
 
 func main() {
+	// Menghubungkan ke database
 	infra.ConnectDB()
+
+	// Melakukan migrasi database
 	migrations.Migrate()
 
+	// Membuat router Gin
 	router := gin.Default()
 
-	// Endpoint authentication
+	// Endpoint untuk login
 	router.POST("/login", handlers.LoginHandler)
 
-	// Protected route
+	// Protected route untuk transfer (gunakan AuthMiddleware)
 	protected := router.Group("/protected")
 	protected.Use(middleware.AuthMiddleware())
-	protected.GET("/data", func(c *gin.Context) {
-		c.JSON(200, gin.H{"message": "Protected content"})
-	})
+	protected.POST("/transfer", handlers.TransferHandler)
 
+	// Menjalankan server
 	router.Run(":8080")
 }
