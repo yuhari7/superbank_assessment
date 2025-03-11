@@ -1,22 +1,48 @@
 package middleware
 
 import (
-	"github.com/gofiber/fiber/v2"
-	"github.com/yuhari7/superbank_assessment/pkg"
+	"net/http"
+	"os"
+	"strings"
+
+	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 )
 
-func JWTMiddleware(c *fiber.Ctx) error {
-	token := c.Get("Authorization")
+var JWT_SECRET = []byte(os.Getenv("JWT_SECRET"))
 
-	if len(token) < 7 || token[:7] != "Bearer " {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Missing or invalid token"})
+func GenerateToken(email string, role string) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"email": email,
+		"role":  role,
+	})
+
+	return token.SignedString(JWT_SECRET)
+}
+
+func AuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			c.Abort()
+			return
+		}
+
+		tokenString := strings.Split(authHeader, "Bearer ")[1]
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, jwt.ErrSignatureInvalid
+			}
+			return JWT_SECRET, nil
+		})
+
+		if err != nil || !token.Valid {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			c.Abort()
+			return
+		}
+
+		c.Next()
 	}
-
-	userID, err := pkg.ValidateJWT(token[7:])
-	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid token"})
-	}
-
-	c.Locals("user_id", userID)
-	return c.Next()
 }
