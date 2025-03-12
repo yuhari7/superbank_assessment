@@ -50,3 +50,19 @@ Response
   "token": "jwt_token_anda"
 }
 ```
+
+Gunakan token untuk mengakses route yang dilindungi dengan menyetelnya di header Authorization sebagai token Bearer.
+
+### Endpoint User
+
+**Buat Pengguna**: `POST /users`
+**Dapatkan Pengguna**: `GET /users/{id}`
+**Perbarui Pengguna**: `PUT /users/{id}`
+**Hapus Pengguna**: `DELETE /users/{id}`
+
+### Endpoint Pocket
+
+**Buat Pocket**: `POST /pockets`
+**Dapatkan Pocket**: `GET /pockets/{id}`
+**Perbarui Pocket**: `PUT /pockets/{id}`
+**Hapus Pocket**: `DELETE /pockets/{id}`
