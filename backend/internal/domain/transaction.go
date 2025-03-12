@@ -1,8 +1,6 @@
 package domain
 
-import (
-	"time"
-)
+import "time"
 
 type Transaction struct {
 	ID         uint      `gorm:"primaryKey"`

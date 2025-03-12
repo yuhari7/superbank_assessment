@@ -9,23 +9,26 @@ import (
 )
 
 func main() {
-	// Menghubungkan ke database
+	// Connect to the database
 	infra.ConnectDB()
 
-	// Melakukan migrasi database
+	// Run migrations
 	migrations.Migrate()
 
-	// Membuat router Gin
+	// Create router
 	router := gin.Default()
 
-	// Endpoint untuk login
+	// Login endpoint
 	router.POST("/login", handlers.LoginHandler)
 
-	// Protected route untuk transfer (gunakan AuthMiddleware)
-	protected := router.Group("/protected")
+	// Protected routes
+	protected := router.Group("/api")
 	protected.Use(middleware.AuthMiddleware())
 	protected.POST("/transfer", handlers.TransferHandler)
+	protected.POST("/pocket", handlers.CreatePocketHandler)
+	protected.GET("/balance", handlers.GetBalanceHandler)
+	protected.GET("/term-deposits", handlers.GetTermDepositsHandler)
 
-	// Menjalankan server
+	// Run the server
 	router.Run(":8080")
 }

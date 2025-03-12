@@ -10,13 +10,22 @@ import (
 func Migrate() {
 	db := infra.DB
 
-	// Auto Migrate Model
-	err := db.AutoMigrate(&domain.User{}, &domain.Pocket{}, &domain.Transaction{}, &domain.TermDeposit{}, &domain.BankAccount{})
+	err := db.Migrator().DropTable(&domain.User{}, &domain.Pocket{}, &domain.Transaction{})
+	if err != nil {
+		log.Fatal("Failed to drop tables: ", err)
+	}
+
+	err = db.AutoMigrate(
+		&domain.User{},
+		&domain.Pocket{},
+		&domain.TermDeposit{},
+		&domain.Transaction{},
+	)
 	if err != nil {
 		log.Fatal("Failed to migrate database: ", err)
 	}
 
-	// Seed User Awal
+	// 🔹 Seed Initial Users
 	seedUsers()
 }
 
@@ -47,10 +56,7 @@ func seedUsers() {
 		if err := user.HashPassword(); err != nil {
 			log.Fatal("Failed to hash password: ", err)
 		}
-		// Create user
 		db.Create(&user)
-
-		// Calculate balance
 		user.CalculateBalance(db)
 		db.Save(&user)
 	}
