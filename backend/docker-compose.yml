@@ -15,7 +15,8 @@ services:
       - db_data:/var/lib/postgresql/data
 
   backend:
-    build: ./backend
+    build:
+      context: ./
     container_name: golang_backend
     restart: always
     depends_on:
@@ -23,7 +24,7 @@ services:
     environment:
       DATABASE_URL: "host=localhost user=ermyyuhari password=ermy123 dbname=superbank_assessment port=5432 sslmode=disable"
     ports:
-      - "3000:3000"
+      - "8080:8080"
 
 volumes:
   db_data:
